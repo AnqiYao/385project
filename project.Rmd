@@ -1,0 +1,36 @@
+---
+title: "project"
+author: "Yixuan Li"
+date: "2017年11月9日"
+output: html_document
+---
+```{r,echo=FALSE}
+HR_data=read.csv("HR_comma_sep.csv")
+na.omit(HR_data)
+```
+```{r}
+HR_data$left=as.factor(HR_data$left)
+```
+```{r}
+library(ggplot2)
+```
+```{r}
+ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))
+```
+```{r,fig.width=10,fig.height=4}
+ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))+
+  facet_grid(.~salary)
+```
+```{r,fig.width=10,fig.height=4}
+ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))+
+  facet_grid(salary~sales)
+```
+
+
+```{r}
+num_remain=summary(HR_data$left)[1]
+num_left=summary(HR_data$left)[2]
+```
+
+
+
