@@ -31,6 +31,20 @@ ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_qua
 num_remain=summary(HR_data$left)[1]
 num_left=summary(HR_data$left)[2]
 ```
-
+```{r,fig.width=12,fig.height=9}
+HR_num=read.csv("HR_comma_sep.csv")
+HR_num$sales=as.numeric(HR_num$sales)
+HR_num$salary=as.numeric(HR_num$salary)
+HR_cor=round(cor(HR_num),2)
+library(reshape2)
+melt_HR=melt(HR_cor)
+head(melt_HR)
+ggplot(melt_HR,aes(Var1,Var2,fill=value))+
+  geom_tile(colour="grey50")+
+  geom_text(aes(Var2, Var1, label = value), color = "black", size = 4)+
+  scale_fill_distiller(palette="BrBG")+
+  labs(title="Correlation Between Variables",x="",y="")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14),axis.text.y = element_text(size = 14))
+```
 
 
