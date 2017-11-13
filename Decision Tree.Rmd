@@ -1,0 +1,49 @@
+---
+title: "project"
+author: "Anqi Yao"
+date: "November 9, 2017"
+output:
+  pdf_document: default
+  html_document: default
+---
+```{r}
+#install.packages("needs")
+library(needs)
+needs(dplyr,
+      rpart, 
+      rpart.plot)
+```
+
+```{r}
+HR_data = read.csv("HR_comma_sep.csv")
+HR_data = na.omit(HR_data)
+n = nrow(HR_data)
+index = sample(n, n * .6)
+
+# Make a few modications
+modified_data = HR_data %>% mutate(
+  left = factor(left, labels = c("Remain", "Left")),
+  salary = ordered(salary, c("low", "medium", "high")),
+  promotion_last_5years = factor(promotion_last_5years, labels = c("Not Promoted", "Promoted")))
+
+train = modified_data[index, ]
+
+tree1 = rpart(left ~ ., data = train)
+
+rpart.plot(tree1, type = 2, fallen.leaves = F, extra = 2)
+```
+
+```{r}
+tree2 = rpart(left ~ satisfaction_level, data = train)
+rpart.plot(tree2, type = 2, fallen.leaves = F, extra = 2)
+```
+
+```{r}
+tree3 = rpart(promotion_last_5years~., data = train)
+rpart.plot(tree3, type = 2, fallen.leaves = F, extra = 2)
+```
+
+```{r}
+tree4 = rpart(salary~., data = train)
+rpart.plot(tree4, type = 2, fallen.leaves = F, extra = 2)
+```
