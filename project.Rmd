@@ -5,31 +5,14 @@ date: "2017年11月9日"
 output: html_document
 ---
 ```{r,echo=FALSE}
-HR_data=read.csv("HR_comma_sep.csv")
-na.omit(HR_data)
+HR_data=read.csv("HR_comma_sep.csv") 
 ```
 ```{r}
 HR_data$left=as.factor(HR_data$left)
+HR_data$promotion_last_5years=as.factor(HR_data$promotion_last_5years)
 ```
 ```{r}
 library(ggplot2)
-```
-```{r}
-ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))
-```
-```{r,fig.width=10,fig.height=4}
-ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))+
-  facet_grid(.~salary)
-```
-```{r,fig.width=10,fig.height=4}
-ggplot(HR_data,aes(left,satisfaction_level))+geom_violin(aes(fill=left),draw_quantiles = c(0.25, 0.5, 0.75))+
-  facet_grid(salary~sales)
-```
-
-
-```{r}
-num_remain=summary(HR_data$left)[1]
-num_left=summary(HR_data$left)[2]
 ```
 ```{r,fig.width=12,fig.height=9}
 HR_num=read.csv("HR_comma_sep.csv")
@@ -42,9 +25,84 @@ head(melt_HR)
 ggplot(melt_HR,aes(Var1,Var2,fill=value))+
   geom_tile(colour="grey50")+
   geom_text(aes(Var2, Var1, label = value), color = "black", size = 4)+
-  scale_fill_distiller(palette="BrBG")+
+  scale_fill_distiller(palette="RdBu")+
   labs(title="Correlation Between Variables",x="",y="")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14),axis.text.y = element_text(size = 14))
+##correlation plot
+```
+```{r,fig.width=10,fig.height=2}
+ggplot(HR_data,aes(left))+
+  geom_bar(aes(fill=salary))+
+  coord_flip()
+##bar plot for left, filter by salary 
+```
+```{r,fig.width=10,fig.height=4}
+ggplot(HR_data,aes(sales))+
+  geom_bar(aes(fill=left),position = "dodge")+
+  coord_flip()
+```
+```{r,fig.width=10,fig.height=2}
+ggplot(HR_data,aes(salary))+
+  geom_bar(aes(fill=salary))+
+  coord_flip()
+```
+```{r,fig.width=6,fig.height=4}
+ggplot(HR_data,aes(satisfaction_level,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 0.05,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+```{r,fig.width=6,fig.height=4}
+ggplot(HR_data,aes(last_evaluation,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 0.05,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+```{r,fig.width=6,fig.height=4}
+ggplot(HR_data,aes(number_project,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 1,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+```{r,fig.width=6,fig.height=4}
+ggplot(HR_data,aes(average_montly_hours,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 10,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+```{r,fig.width=6,fig.height=4}
+ggplot(HR_data,aes(time_spend_company,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 1,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+```{r,fig.width=6,fig.height=2}
+ggplot(HR_data,aes(Work_accident,fill = left))+
+  geom_histogram(binwidth = 1,col="Black",alpha=0.5,position="identity")+
+  coord_flip()
+```
+```{r,fig.width=6,fig.height=2}
+ggplot(HR_data,aes(promotion_last_5years,fill = left))+
+  geom_histogram(binwidth = 1,col="Black",alpha=0.5,position="identity")+
+  coord_flip()
+```
+```{r}
+num_remain=summary(HR_data$left)[1]
+num_left=summary(HR_data$left)[2]
+```
+```{r,fig.width=10,fig.height=4}
+library(dplyr)
+HR_left=HR_data%>%filter(left==1)
+HR_remain=HR_data%>%filter(left==0)
+summary(HR_left)
+```
+```{r}
+HR_sales=HR_data%>%filter(sales=="sales")
+count(HR_sales,left==1)
+summary(HR_data$sales)[1]
+```
+```{r}
+model <- glm(left ~ .^2+I(satisfaction_level^2)+I(last_evaluation^2)+I(number_project^2)+I(average_montly_hours^2)+I(time_spend_company^2)+I(Work_accident^2),family="binomial",data=HR_data)
+summary(model)
+```
+```{r}
+library(pscl)
+pR2(model)
 ```
 
 
