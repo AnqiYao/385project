@@ -18,7 +18,7 @@ needs(dplyr,
 HR_data = read.csv("HR_comma_sep.csv")
 HR_data = na.omit(HR_data)
 n = nrow(HR_data)
-index = sample(n, n * .6)
+index = sample(n, n * 1)
 
 # Make a few modications
 modified_data = HR_data %>% mutate(
@@ -30,7 +30,7 @@ train = modified_data[index, ]
 
 tree1 = rpart(left ~ ., data = train)
 
-rpart.plot(tree1, type = 2, fallen.leaves = F, extra = 2)
+rpart.plot(tree1, type = 2, fallen.leaves = F)
 ```
 
 ```{r}
@@ -46,4 +46,11 @@ rpart.plot(tree3, type = 2, fallen.leaves = F, extra = 2)
 ```{r}
 tree4 = rpart(salary~., data = train)
 rpart.plot(tree4, type = 2, fallen.leaves = F, extra = 2)
+```
+
+```{r}
+model_dt <- rpart(left ~ ., data=train, method="class", minbucket=25)
+bestcp <- model_dt$cptable[which.min(model_dt$cptable[,"xerror"]),"CP"]
+model_dt.pruned <- prune(model_dt, cp = bestcp)
+rpart.plot(model_dt.pruned, type = 2, fallen.leaves = F)
 ```
