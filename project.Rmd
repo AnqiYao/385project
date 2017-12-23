@@ -1,19 +1,21 @@
 ---
 title: "project"
 author: "Yixuan Li"
-date: "2017年11月9日"
+date: "2017???11???9???"
 output: html_document
 ---
+##**Clean up the data**
 ```{r,echo=FALSE}
 HR_data=read.csv("HR_comma_sep.csv") 
-```
-```{r}
+HR_data=na.omit(HR_data)
 HR_data$left=as.factor(HR_data$left)
 HR_data$promotion_last_5years=as.factor(HR_data$promotion_last_5years)
+summary(HR_data)
 ```
 ```{r}
 library(ggplot2)
 ```
+##**Correlation Matrix**
 ```{r,fig.width=12,fig.height=9}
 HR_num=read.csv("HR_comma_sep.csv")
 HR_num$sales=as.numeric(HR_num$sales)
@@ -28,81 +30,146 @@ ggplot(melt_HR,aes(Var1,Var2,fill=value))+
   scale_fill_distiller(palette="RdBu")+
   labs(title="Correlation Between Variables",x="",y="")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1,size = 14),axis.text.y = element_text(size = 14))
-##correlation plot
 ```
+##**Bar plot for salary, filter by left**
 ```{r,fig.width=10,fig.height=2}
 ggplot(HR_data,aes(left))+
   geom_bar(aes(fill=salary))+
   coord_flip()
-##bar plot for left, filter by salary 
 ```
+##**Bar plot for working department, filter by left**
 ```{r,fig.width=10,fig.height=4}
 ggplot(HR_data,aes(sales))+
   geom_bar(aes(fill=left),position = "dodge")+
   coord_flip()
 ```
+##**Bar plot for salary**
 ```{r,fig.width=10,fig.height=2}
 ggplot(HR_data,aes(salary))+
   geom_bar(aes(fill=salary))+
   coord_flip()
 ```
+##**Bar plot for satisfaction level, with density estimate**
 ```{r,fig.width=6,fig.height=4}
 ggplot(HR_data,aes(satisfaction_level,fill = left))+
   geom_histogram(aes(y=..density..),binwidth = 0.05,col="Black",alpha=0.5,position="identity")+
   geom_density(alpha=0.3)
 ```
+##**Bar plot for average monthly hours, with density estimate**
+```{r}
+ggplot(HR_data,aes(average_montly_hours,fill = left))+
+  geom_histogram(aes(y=..density..),binwidth = 10,col="Black",alpha=0.5,position="identity")+
+  geom_density(alpha=0.3)
+```
+##**Bar plot for last evaluation, with density estimate**
 ```{r,fig.width=6,fig.height=4}
 ggplot(HR_data,aes(last_evaluation,fill = left))+
   geom_histogram(aes(y=..density..),binwidth = 0.05,col="Black",alpha=0.5,position="identity")+
   geom_density(alpha=0.3)
 ```
+##**Bar plot for number of projects, with density estimate**
 ```{r,fig.width=6,fig.height=4}
 ggplot(HR_data,aes(number_project,fill = left))+
   geom_histogram(aes(y=..density..),binwidth = 1,col="Black",alpha=0.5,position="identity")+
   geom_density(alpha=0.3)
 ```
-```{r,fig.width=6,fig.height=4}
-ggplot(HR_data,aes(average_montly_hours,fill = left))+
-  geom_histogram(aes(y=..density..),binwidth = 10,col="Black",alpha=0.5,position="identity")+
-  geom_density(alpha=0.3)
-```
+##**Bar plot for time spent company, with density estimate**
 ```{r,fig.width=6,fig.height=4}
 ggplot(HR_data,aes(time_spend_company,fill = left))+
   geom_histogram(aes(y=..density..),binwidth = 1,col="Black",alpha=0.5,position="identity")+
   geom_density(alpha=0.3)
 ```
-```{r,fig.width=6,fig.height=2}
-ggplot(HR_data,aes(Work_accident,fill = left))+
-  geom_histogram(binwidth = 1,col="Black",alpha=0.5,position="identity")+
-  coord_flip()
-```
-```{r,fig.width=6,fig.height=2}
-ggplot(HR_data,aes(promotion_last_5years,fill = left))+
-  geom_histogram(binwidth = 1,col="Black",alpha=0.5,position="identity")+
-  coord_flip()
-```
+##**Logistic model**
 ```{r}
-num_remain=summary(HR_data$left)[1]
-num_left=summary(HR_data$left)[2]
-```
-```{r,fig.width=10,fig.height=4}
 library(dplyr)
-HR_left=HR_data%>%filter(left==1)
-HR_remain=HR_data%>%filter(left==0)
-summary(HR_left)
+train=HR_data[sample(nrow(HR_data), 10000), ]
+model <- glm(left ~ .,family="binomial",data=HR_data)
+fitted_value = predict(model,newdata=HR_data,type='response')
+for (i in 1:length(fitted_value)){
+  if (fitted_value[i]<=0.5){
+  fitted_value[i]=0
+}else{
+  fitted_value[i]=1
+}}
+accuracy=table(fitted_value==HR_data$left)[2]/length(HR_data[,1])
+```
+##**Scatter plot of last evaluation and average monthly hours with regression line**
+```{r}
+coef_1=coef(lm(last_evaluation~average_montly_hours,data=HR_data))
+ggplot(HR_data)+
+  geom_jitter(aes(x=average_montly_hours,y=last_evaluation,colour=left),alpha=0.5)+
+  geom_abline(intercept=coef_1[1], slope=coef_1[2], size=1)
+```
+##**Scatter plot of satisfaction level and average monthly hours with regression line**
+```{r}
+coef_2=coef(lm(satisfaction_level~average_montly_hours,data=HR_data))
+ggplot(HR_data)+
+  geom_jitter(aes(x=average_montly_hours,y=satisfaction_level,colour=left),alpha=0.5)+
+  geom_abline(intercept=coef_2[1], slope=-coef_2[2], size=1)
+```
+##**Scatter plot of number of projects  and average monthly hours with regression line**
+```{r}
+ggplot(HR_data)+
+  geom_jitter(aes(x=average_montly_hours,y=number_project,colour=left),alpha=0.5)
+```
+
+##**Decision tree model**
+```{r}
+library(rpart)
+library(rpart.plot)
 ```
 ```{r}
-HR_sales=HR_data%>%filter(sales=="sales")
-count(HR_sales,left==1)
-summary(HR_data$sales)[1]
+HR_data = read.csv("HR_comma_sep.csv")
+HR_data = na.omit(HR_data)
+modified_data = HR_data %>% mutate(
+  left = factor(left, labels = c("Remain", "Left")))
+set.seed(1234)
+test_number=sample(seq_len(nrow(modified_data)),size=floor(0.25*15000))
+test=modified_data[test_num,]
+test
 ```
 ```{r}
-model <- glm(left ~ .^2+I(satisfaction_level^2)+I(last_evaluation^2)+I(number_project^2)+I(average_montly_hours^2)+I(time_spend_company^2)+I(Work_accident^2),family="binomial",data=HR_data)
-summary(model)
+tree1=rpart(left~.,data=modified_data)
+rpart.plot(tree1, type = 2, fallen.leaves = F)
+result=predict(tree1,test,type="class")
+real_left=gsub("0","Remain",result)
+real_left=gsub("1","Left",result)
+table(real_left==test$left)/floor(0.25*15000)
 ```
 ```{r}
-library(pscl)
-pR2(model)
+tree2 = rpart(left ~ satisfaction_level, data = modified_data)
+rpart.plot(tree2, type = 2, fallen.leaves = F, extra = 2)
+result=predict(tree2,test,type="class")
+real_left=gsub("0","Remain",result)
+real_left=gsub("1","Left",result)
+table(real_left==test$left)/floor(0.25*15000)
 ```
+```{r}
+tree3 = rpart(left ~ satisfaction_level+last_evaluation, data = modified_data)
+rpart.plot(tree3, type = 2, fallen.leaves = F, extra = 2)
+result=predict(tree3,test,type="class")
+real_left=gsub("0","Remain",result)
+real_left=gsub("1","Left",result)
+table(real_left==test$left)/floor(0.25*15000)
+```
+```{r}
+tree4 = rpart(left ~ satisfaction_level+last_evaluation+average_montly_hours, data = modified_data)
+rpart.plot(tree4, type = 2, fallen.leaves = F, extra = 2)
+result=predict(tree4,test,type="class")
+real_left=gsub("0","Remain",result)
+real_left=gsub("1","Left",result)
+table(real_left==test$left)/floor(0.25*15000)
+```
+```{r}
+tree5 = rpart(left ~ satisfaction_level+last_evaluation+average_montly_hours+number_project, data = modified_data)
+rpart.plot(tree5, type = 2, fallen.leaves = F, extra = 2)
+result=predict(tree5,test,type="class")
+real_left=gsub("0","Remain",result)
+real_left=gsub("1","Left",result)
+table(real_left==test$left)/floor(0.25*15000)
+```
+
+
+
 
 
