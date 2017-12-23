@@ -82,16 +82,15 @@ ggplot(HR_data,aes(time_spend_company,fill = left))+
 ##**Logistic model**
 ```{r}
 library(dplyr)
-train=HR_data[sample(nrow(HR_data), 10000), ]
 model <- glm(left ~ .,family="binomial",data=HR_data)
-fitted_value = predict(model,newdata=HR_data,type='response')
-for (i in 1:length(fitted_value)){
-  if (fitted_value[i]<=0.5){
-  fitted_value[i]=0
+predicted = predict(model,newdata=HR_data,type='response')
+for (i in 1:length(predicted)){
+  if (predicted[i]<=0.5){
+  predicted[i]=0
 }else{
-  fitted_value[i]=1
+  predicted[i]=1
 }}
-accuracy=table(fitted_value==HR_data$left)[2]/length(HR_data[,1])
+table(predicted==HR_data$left)[2]/length(HR_data[,1])
 ```
 ##**Scatter plot of last evaluation and average monthly hours with regression line**
 ```{r}
@@ -124,9 +123,8 @@ HR_data = na.omit(HR_data)
 modified_data = HR_data %>% mutate(
   left = factor(left, labels = c("Remain", "Left")))
 set.seed(1234)
-test_number=sample(seq_len(nrow(modified_data)),size=floor(0.25*15000))
+test_number=sample(nrow(modified_data),size=floor(0.25*14999))
 test=modified_data[test_num,]
-test
 ```
 ```{r}
 tree1=rpart(left~.,data=modified_data)
@@ -134,7 +132,7 @@ rpart.plot(tree1, type = 2, fallen.leaves = F)
 result=predict(tree1,test,type="class")
 real_left=gsub("0","Remain",result)
 real_left=gsub("1","Left",result)
-table(real_left==test$left)/floor(0.25*15000)
+table(real_left==test$left)/floor(0.25*14999)
 ```
 ```{r}
 tree2 = rpart(left ~ satisfaction_level, data = modified_data)
@@ -142,7 +140,7 @@ rpart.plot(tree2, type = 2, fallen.leaves = F, extra = 2)
 result=predict(tree2,test,type="class")
 real_left=gsub("0","Remain",result)
 real_left=gsub("1","Left",result)
-table(real_left==test$left)/floor(0.25*15000)
+table(real_left==test$left)/floor(0.25*14999)
 ```
 ```{r}
 tree3 = rpart(left ~ satisfaction_level+last_evaluation, data = modified_data)
@@ -150,7 +148,7 @@ rpart.plot(tree3, type = 2, fallen.leaves = F, extra = 2)
 result=predict(tree3,test,type="class")
 real_left=gsub("0","Remain",result)
 real_left=gsub("1","Left",result)
-table(real_left==test$left)/floor(0.25*15000)
+table(real_left==test$left)/floor(0.25*14999)
 ```
 ```{r}
 tree4 = rpart(left ~ satisfaction_level+last_evaluation+average_montly_hours, data = modified_data)
@@ -158,7 +156,7 @@ rpart.plot(tree4, type = 2, fallen.leaves = F, extra = 2)
 result=predict(tree4,test,type="class")
 real_left=gsub("0","Remain",result)
 real_left=gsub("1","Left",result)
-table(real_left==test$left)/floor(0.25*15000)
+table(real_left==test$left)/floor(0.25*14999)
 ```
 ```{r}
 tree5 = rpart(left ~ satisfaction_level+last_evaluation+average_montly_hours+number_project, data = modified_data)
@@ -166,7 +164,7 @@ rpart.plot(tree5, type = 2, fallen.leaves = F, extra = 2)
 result=predict(tree5,test,type="class")
 real_left=gsub("0","Remain",result)
 real_left=gsub("1","Left",result)
-table(real_left==test$left)/floor(0.25*15000)
+table(real_left==test$left)/floor(0.25*14999)
 ```
 
 
